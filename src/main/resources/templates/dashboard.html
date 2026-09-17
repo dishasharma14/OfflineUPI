@@ -2,242 +2,815 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>UPI Offline Mesh — Demo</title>
+    <title>OfflineUPI — Payment Dashboard</title>
+
     <style>
-        * { box-sizing: border-box; }
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            margin: 0; padding: 24px; background: #0d1117; color: #e6edf3;
+            margin: 0;
+            padding: 24px;
+            background: #0d1117;
+            color: #e6edf3;
         }
-        h1 { margin-top: 0; color: #f0f6fc; }
-        h2 { color: #58a6ff; border-bottom: 1px solid #30363d; padding-bottom: 4px; margin-top: 32px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        .grid { display: grid; gap: 16px; }
-        .grid-2 { grid-template-columns: 1fr 1fr; }
-        .grid-3 { grid-template-columns: repeat(3, 1fr); }
-        .card {
-            background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px;
+
+        h1 {
+            margin-top: 0;
+            color: #f0f6fc;
+            font-size: 32px;
         }
+
+        h2 {
+            color: #58a6ff;
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 8px;
+            margin-top: 20px;
+        }
+
+        h3 {
+            color: #f0f6fc;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .grid-2 {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .card,
+        .controls {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 18px;
+        }
+
+        .controls {
+            margin-top: 20px;
+            margin-bottom: 16px;
+        }
+
+        .summary-card {
+            min-height: 110px;
+        }
+
+        .summary-number {
+            font-size: 26px;
+            font-weight: 700;
+            color: #f0f6fc;
+            margin: 6px 0;
+        }
+
         .device {
-            border: 1px solid #30363d; border-radius: 6px; padding: 12px; margin-bottom: 8px;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 8px;
             background: #0d1117;
         }
-        .device.bridge { border-color: #2ea043; background: #052e16; }
-        .device.offline { opacity: 0.85; }
-        .badge {
-            display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px;
-            font-weight: 600; margin-left: 8px;
+
+        .device.bridge {
+            border-color: #2ea043;
+            background: #052e16;
         }
-        .badge-online { background: #2ea043; color: white; }
-        .badge-offline { background: #6e7681; color: white; }
+
+        .device.offline {
+            opacity: 0.85;
+        }
+
+        .badge {
+            display: inline-block;
+            font-size: 11px;
+            padding: 3px 9px;
+            border-radius: 10px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .badge-online {
+            background: #2ea043;
+            color: white;
+        }
+
+        .badge-offline {
+            background: #6e7681;
+            color: white;
+        }
+
         .packet-id {
-            font-family: 'Consolas', 'Monaco', monospace; font-size: 11px;
-            background: #21262d; padding: 2px 6px; border-radius: 3px; margin: 2px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 11px;
+            background: #21262d;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin: 2px;
             display: inline-block;
         }
+
         button {
-            background: #238636; color: white; border: none; padding: 8px 16px;
-            border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;
+            background: #238636;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
             margin: 4px;
         }
-        button:hover { background: #2ea043; }
-        button.danger { background: #da3633; }
-        button.danger:hover { background: #f85149; }
-        button.secondary { background: #1f6feb; }
-        button.secondary:hover { background: #388bfd; }
-        input, select {
-            background: #0d1117; color: #e6edf3; border: 1px solid #30363d;
-            border-radius: 4px; padding: 6px 10px; font-size: 14px; margin: 4px;
+
+        button:hover {
+            background: #2ea043;
         }
-        table { width: 100%; border-collapse: collapse; font-size: 14px; }
-        th, td { text-align: left; padding: 8px; border-bottom: 1px solid #30363d; }
-        th { color: #8b949e; font-weight: 600; font-size: 12px; text-transform: uppercase; }
-        .status-SETTLED { color: #56d364; font-weight: 600; }
-        .status-REJECTED { color: #f85149; font-weight: 600; }
-        .status-DUPLICATE_DROPPED { color: #d29922; font-weight: 600; }
-        .status-INVALID { color: #f85149; font-weight: 600; }
+
+        button.danger {
+            background: #da3633;
+        }
+
+        button.danger:hover {
+            background: #f85149;
+        }
+
+        button.secondary {
+            background: #1f6feb;
+        }
+
+        button.secondary:hover {
+            background: #388bfd;
+        }
+
+        input,
+        select {
+            background: #0d1117;
+            color: #e6edf3;
+            border: 1px solid #30363d;
+            border-radius: 4px;
+            padding: 7px 10px;
+            font-size: 14px;
+            margin: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 9px;
+            border-bottom: 1px solid #30363d;
+        }
+
+        th {
+            color: #8b949e;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .status-SETTLED {
+            color: #56d364;
+            font-weight: 600;
+        }
+
+        .status-REJECTED {
+            color: #f85149;
+            font-weight: 600;
+        }
+
+        .status-DUPLICATE_DROPPED {
+            color: #d29922;
+            font-weight: 600;
+        }
+
+        .status-INVALID {
+            color: #f85149;
+            font-weight: 600;
+        }
+
         #log {
-            background: #010409; color: #7ee787; padding: 12px; border-radius: 6px;
-            font-family: 'Consolas', 'Monaco', monospace; font-size: 12px;
-            max-height: 220px; overflow-y: auto; white-space: pre-wrap;
+            background: #010409;
+            color: #7ee787;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 12px;
+            max-height: 220px;
+            overflow-y: auto;
+            white-space: pre-wrap;
             border: 1px solid #30363d;
         }
-        .controls { background: #161b22; padding: 16px; border-radius: 8px;
-                    border: 1px solid #30363d; margin-bottom: 16px; }
+
         .step-num {
-            display: inline-block; background: #58a6ff; color: white;
-            border-radius: 50%; width: 24px; height: 24px; text-align: center;
-            line-height: 24px; font-weight: 600; margin-right: 8px;
+            display: inline-block;
+            background: #58a6ff;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            text-align: center;
+            line-height: 24px;
+            font-weight: 600;
+            margin-right: 8px;
         }
-        .balance { font-family: 'Consolas', monospace; color: #56d364; font-weight: 600; }
-        .small { font-size: 12px; color: #8b949e; }
+
+        .balance {
+            font-family: 'Consolas', monospace;
+            color: #56d364;
+            font-weight: 600;
+        }
+
+        .small {
+            font-size: 12px;
+            color: #8b949e;
+        }
+
+        .workflow {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .workflow-step {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 14px;
+            text-align: center;
+        }
+
+        .workflow-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #58a6ff;
+            font-size: 20px;
+        }
+
+        @media (max-width: 800px) {
+            .grid-2,
+            .grid-3,
+            .workflow {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
+
 <body>
+
 <div class="container">
-    <h1>📡 UPI Offline Mesh — Live Demo</h1>
+
+    <!-- HEADER -->
+    <h1>📡 OfflineUPI</h1>
+
     <p class="small">
-        Send money in a basement with zero internet. Encrypted packets gossip from phone to phone
-        until one with 4G reaches the backend.
+        Secure peer-to-peer payments designed for situations where internet connectivity is unavailable.
     </p>
 
-    <div class="controls">
-        <h3 style="margin-top:0">🎬 Demo Flow</h3>
+    <div style="margin-top: 12px;">
+        <span class="badge badge-online">● System Online</span>
+        <span class="small">Offline payment mesh ready</span>
+    </div>
 
+
+    <!-- SEND PAYMENT -->
+    <div class="controls">
+
+        <h3 style="margin-top: 0;">💸 Send Payment</h3>
+
+        <p class="small">
+            Create a payment and route it through the offline mesh.
+        </p>
+
+        <!-- STEP 1 -->
         <div>
-            <span class="step-num">1</span><strong>Compose payment</strong> (simulates sender phone)
+            <span class="step-num">1</span>
+            <strong>Payment Details</strong>
+
             <br>
+
             <select id="senderVpa">
                 <option>alice@demo</option>
                 <option>bob@demo</option>
                 <option>carol@demo</option>
             </select>
+
             →
+
             <select id="receiverVpa">
                 <option>bob@demo</option>
                 <option>carol@demo</option>
                 <option>alice@demo</option>
                 <option>dave@demo</option>
             </select>
-            ₹<input type="number" id="amount" value="500" style="width: 100px">
-            PIN <input type="text" id="pin" value="1234" style="width: 80px" maxlength="4">
-            <button onclick="sendPacket()">📤 Inject into Mesh</button>
+
+            ₹<input
+                type="number"
+                id="amount"
+                value="500"
+                style="width: 100px;"
+            >
+
+            PIN
+            <input
+                type="text"
+                id="pin"
+                value="1234"
+                style="width: 80px;"
+                maxlength="4"
+            >
+
+            <button onclick="sendPacket()">
+                📤 Send Payment
+            </button>
         </div>
 
-        <div style="margin-top: 16px">
-            <span class="step-num">2</span><strong>Gossip</strong> — packets hop device-to-device
-            <button class="secondary" onclick="gossip()">🔄 Run Gossip Round</button>
+
+        <!-- STEP 2 -->
+        <div style="margin-top: 20px;">
+
+            <span class="step-num">2</span>
+            <strong>Mesh Transfer</strong>
+
+            <p class="small" style="margin: 6px 0 8px 32px;">
+                Payment packets move between nearby devices without internet.
+            </p>
+
+            <button class="secondary" onclick="gossip()">
+                🔄 Transfer Through Mesh
+            </button>
+
         </div>
 
-        <div style="margin-top: 16px">
-            <span class="step-num">3</span><strong>Bridge node walks outside, hits 4G</strong>
-            <button class="secondary" onclick="flushBridges()">📡 Bridges Upload to Backend</button>
-            <span class="small">(parallel — exercises idempotency)</span>
+
+        <!-- STEP 3 -->
+        <div style="margin-top: 20px;">
+
+            <span class="step-num">3</span>
+            <strong>Bridge & Settlement</strong>
+
+            <p class="small" style="margin: 6px 0 8px 32px;">
+                A connected bridge device uploads the payment to the backend for settlement.
+            </p>
+
+            <button class="secondary" onclick="flushBridges()">
+                📡 Connect & Settle
+            </button>
+
         </div>
 
-        <div style="margin-top: 16px">
-            <button class="danger" onclick="resetMesh()">🗑 Reset Mesh + Cache</button>
+
+        <!-- RESET -->
+        <div style="margin-top: 16px;">
+            <button class="danger" onclick="resetMesh()">
+                ↻ Reset Demo
+            </button>
         </div>
+
     </div>
 
+
+    <!-- DASHBOARD SUMMARY -->
+    <div class="grid grid-3" style="margin-bottom: 16px;">
+
+        <div class="card summary-card">
+            <div class="small">MESH DEVICES</div>
+
+            <div class="summary-number">
+                📱 <span id="deviceCount">—</span>
+            </div>
+
+            <div class="small">
+                Devices in network
+            </div>
+        </div>
+
+
+        <div class="card summary-card">
+            <div class="small">TRANSACTIONS</div>
+
+            <div class="summary-number">
+                💳 <span id="transactionCount">—</span>
+            </div>
+
+            <div class="small">
+                Recorded transactions
+            </div>
+        </div>
+
+
+        <div class="card summary-card">
+            <div class="small">MESH CACHE</div>
+
+            <div class="summary-number">
+                ⚡ <span id="cacheCount">—</span>
+            </div>
+
+            <div class="small">
+                Idempotency entries
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- DEVICES + ACCOUNTS -->
     <div class="grid grid-2">
+
         <div class="card">
+
             <h2>📱 Mesh Devices</h2>
+
             <div id="devices"></div>
+
         </div>
+
 
         <div class="card">
+
             <h2>🏦 Account Balances</h2>
+
             <table id="accounts-table">
-                <thead><tr><th>VPA</th><th>Holder</th><th>Balance</th></tr></thead>
+
+                <thead>
+                <tr>
+                    <th>VPA</th>
+                    <th>Holder</th>
+                    <th>Balance</th>
+                </tr>
+                </thead>
+
                 <tbody></tbody>
+
             </table>
+
             <p class="small" id="cacheInfo"></p>
+
         </div>
+
     </div>
 
-    <div class="card" style="margin-top: 16px">
+
+    <!-- HOW IT WORKS -->
+    <div class="card" style="margin-top: 16px;">
+
+        <h2>🔗 How OfflineUPI Works</h2>
+
+        <p class="small">
+            Payments can travel through nearby devices before reaching a connected bridge node.
+        </p>
+
+        <div class="workflow">
+
+            <div class="workflow-step">
+                <strong>1. Create Payment</strong>
+                <div class="small" style="margin-top: 6px;">
+                    Sender creates a payment packet.
+                </div>
+            </div>
+
+            <div class="workflow-step">
+                <strong>2. Mesh Transfer</strong>
+                <div class="small" style="margin-top: 6px;">
+                    Devices forward the packet.
+                </div>
+            </div>
+
+            <div class="workflow-step">
+                <strong>3. Bridge Node</strong>
+                <div class="small" style="margin-top: 6px;">
+                    Connected device reaches the backend.
+                </div>
+            </div>
+
+            <div class="workflow-step">
+                <strong>4. Settlement</strong>
+                <div class="small" style="margin-top: 6px;">
+                    Backend validates and settles.
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- TRANSACTION LEDGER -->
+    <div class="card" style="margin-top: 16px;">
+
         <h2>📜 Transaction Ledger</h2>
+
         <table id="tx-table">
-            <thead><tr>
-                <th>ID</th><th>From</th><th>To</th><th>Amount</th>
-                <th>Status</th><th>Bridge</th><th>Hops</th><th>Settled</th>
-            </tr></thead>
+
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Bridge</th>
+                <th>Hops</th>
+                <th>Settled</th>
+            </tr>
+            </thead>
+
             <tbody></tbody>
+
         </table>
+
     </div>
 
-    <div class="card" style="margin-top: 16px">
+
+    <!-- ACTIVITY LOG -->
+    <div class="card" style="margin-top: 16px;">
+
         <h2>🪵 Activity Log</h2>
+
         <div id="log"></div>
+
     </div>
+
 </div>
 
+
 <script>
+
 function log(msg) {
+
     const el = document.getElementById('log');
-    el.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg + '\n' + el.textContent;
+
+    el.textContent =
+        '[' +
+        new Date().toLocaleTimeString() +
+        '] ' +
+        msg +
+        '\n' +
+        el.textContent;
 }
 
+
 async function refresh() {
+
     // Mesh state
-    const m = await fetch('/api/mesh/state').then(r => r.json());
-    const devicesDiv = document.getElementById('devices');
-    devicesDiv.innerHTML = m.devices.map(d => `
+    const m =
+        await fetch('/api/mesh/state')
+            .then(r => r.json());
+
+
+    const devicesDiv =
+        document.getElementById('devices');
+
+
+    devicesDiv.innerHTML =
+        m.devices.map(d => `
+
         <div class="device ${d.hasInternet ? 'bridge' : 'offline'}">
+
             <strong>${d.deviceId}</strong>
+
             <span class="badge ${d.hasInternet ? 'badge-online' : 'badge-offline'}">
+
                 ${d.hasInternet ? '🌐 4G' : '🚫 OFFLINE'}
+
             </span>
-            <span class="small">holding ${d.packetCount} packet(s)</span>
-            <div>${d.packetIds.map(id => `<span class="packet-id">${id}</span>`).join('')}</div>
+
+            <span class="small">
+                holding ${d.packetCount} packet(s)
+            </span>
+
+            <div>
+                ${d.packetIds
+                    .map(id => `<span class="packet-id">${id}</span>`)
+                    .join('')}
+            </div>
+
         </div>
+
     `).join('');
+
+
     document.getElementById('cacheInfo').textContent =
         `Idempotency cache size: ${m.idempotencyCacheSize}`;
 
+
+    // Dashboard summary
+    document.getElementById('deviceCount').textContent =
+        m.devices.length;
+
+    document.getElementById('cacheCount').textContent =
+        m.idempotencyCacheSize;
+
+
     // Accounts
-    const accs = await fetch('/api/accounts').then(r => r.json());
-    document.querySelector('#accounts-table tbody').innerHTML = accs.map(a => `
-        <tr><td>${a.vpa}</td><td>${a.holderName}</td>
-            <td class="balance">₹${parseFloat(a.balance).toFixed(2)}</td></tr>
-    `).join('');
+    const accs =
+        await fetch('/api/accounts')
+            .then(r => r.json());
+
+
+    document.querySelector('#accounts-table tbody').innerHTML =
+
+        accs.map(a => `
+
+            <tr>
+
+                <td>${a.vpa}</td>
+
+                <td>${a.holderName}</td>
+
+                <td class="balance">
+                    ₹${parseFloat(a.balance).toFixed(2)}
+                </td>
+
+            </tr>
+
+        `).join('');
+
 
     // Transactions
-    const txs = await fetch('/api/transactions').then(r => r.json());
-    document.querySelector('#tx-table tbody').innerHTML = txs.map(t => `
-        <tr>
-            <td>${t.id}</td><td>${t.senderVpa}</td><td>${t.receiverVpa}</td>
-            <td class="balance">₹${parseFloat(t.amount).toFixed(2)}</td>
-            <td class="status-${t.status}">${t.status}</td>
-            <td>${t.bridgeNodeId}</td><td>${t.hopCount}</td>
-            <td class="small">${new Date(t.settledAt).toLocaleTimeString()}</td>
-        </tr>
-    `).join('');
+    const txs =
+        await fetch('/api/transactions')
+            .then(r => r.json());
+
+
+    document.getElementById('transactionCount').textContent =
+        txs.length;
+
+
+    document.querySelector('#tx-table tbody').innerHTML =
+
+        txs.map(t => `
+
+            <tr>
+
+                <td>${t.id}</td>
+
+                <td>${t.senderVpa}</td>
+
+                <td>${t.receiverVpa}</td>
+
+                <td class="balance">
+                    ₹${parseFloat(t.amount).toFixed(2)}
+                </td>
+
+                <td class="status-${t.status}">
+                    ${t.status}
+                </td>
+
+                <td>${t.bridgeNodeId}</td>
+
+                <td>${t.hopCount}</td>
+
+                <td class="small">
+                    ${new Date(t.settledAt).toLocaleTimeString()}
+                </td>
+
+            </tr>
+
+        `).join('');
+
 }
+
 
 async function sendPacket() {
+
     const body = {
-        senderVpa: document.getElementById('senderVpa').value,
-        receiverVpa: document.getElementById('receiverVpa').value,
-        amount: parseFloat(document.getElementById('amount').value),
-        pin: document.getElementById('pin').value,
+
+        senderVpa:
+            document.getElementById('senderVpa').value,
+
+        receiverVpa:
+            document.getElementById('receiverVpa').value,
+
+        amount:
+            parseFloat(
+                document.getElementById('amount').value
+            ),
+
+        pin:
+            document.getElementById('pin').value,
+
         ttl: 5,
+
         startDevice: 'phone-alice'
     };
-    const r = await fetch('/api/demo/send', {
-        method: 'POST', headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(body)
-    }).then(r => r.json());
-    log(`📤 Packet ${r.packetId.substring(0,8)} encrypted & injected at ${r.injectedAt} (TTL ${r.ttl})`);
-    log(`   ciphertext (truncated): ${r.ciphertextPreview}`);
+
+
+    const r =
+        await fetch('/api/demo/send', {
+
+            method: 'POST',
+
+            headers: {
+                'Content-Type': 'application/json'
+            },
+
+            body: JSON.stringify(body)
+
+        }).then(r => r.json());
+
+
+    log(
+        `📤 Packet ${r.packetId.substring(0,8)} encrypted & injected at ${r.injectedAt} (TTL ${r.ttl})`
+    );
+
+    log(
+        `   ciphertext (truncated): ${r.ciphertextPreview}`
+    );
+
+
     refresh();
+
 }
+
 
 async function gossip() {
-    const r = await fetch('/api/mesh/gossip', {method: 'POST'}).then(r => r.json());
-    log(`🔄 Gossip: ${r.transfers} transfer(s) — ${JSON.stringify(r.deviceCounts)}`);
+
+    const r =
+        await fetch('/api/mesh/gossip', {
+            method: 'POST'
+        }).then(r => r.json());
+
+
+    log(
+        `🔄 Gossip: ${r.transfers} transfer(s) — ${JSON.stringify(r.deviceCounts)}`
+    );
+
+
     refresh();
+
 }
+
 
 async function flushBridges() {
-    const r = await fetch('/api/mesh/flush', {method: 'POST'}).then(r => r.json());
-    log(`📡 ${r.uploadsAttempted} bridge upload(s):`);
+
+    const r =
+        await fetch('/api/mesh/flush', {
+            method: 'POST'
+        }).then(r => r.json());
+
+
+    log(
+        `📡 ${r.uploadsAttempted} bridge upload(s):`
+    );
+
+
     r.results.forEach(res => {
-        log(`   ${res.bridgeNode} packet ${res.packetId} → ${res.outcome}` +
-            (res.reason ? ` (${res.reason})` : ''));
+
+        log(
+            `   ${res.bridgeNode} packet ${res.packetId} → ${res.outcome}` +
+            (res.reason
+                ? ` (${res.reason})`
+                : '')
+        );
+
     });
+
+
     refresh();
+
 }
+
 
 async function resetMesh() {
-    await fetch('/api/mesh/reset', {method: 'POST'});
+
+    await fetch('/api/mesh/reset', {
+        method: 'POST'
+    });
+
+
     log('🗑 mesh + idempotency cache cleared');
+
+
     refresh();
+
 }
 
+
 refresh();
+
 setInterval(refresh, 3000);
+
 </script>
+
 </body>
 </html>
